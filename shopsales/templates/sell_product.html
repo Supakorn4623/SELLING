@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- โหลด Static เพื่อให้ Django หาไฟล์ JS ได้ -->
+
+{% block title %}ระบบขายสินค้า{% endblock %}
+
+{% block content %}
+<div class="header">ระบบขายสินค้า</div>
+<div class="main-container">
+    <div class="barcode-container">
+        <input type="text" id="barcode-input" onkeydown="scanBarcode(event)" placeholder="สแกนบาร์โค้ดที่นี่" autofocus>
+        <button onclick="manualScan()">🔍 กรอกบาร์โค้ด</button>
+    </div>
+
+    <table id="cart">
+        <thead>
+            <tr>
+                <th>รหัสสินค้า</th>
+                <th>ชื่อสินค้า</th>
+                <th>ราคา</th>
+                <th>จำนวน</th>
+                <th>รวมเงิน</th>
+                <th>ลบ</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="summary">
+        <span>ยอดรวม:</span>
+        <span class="total"><span id="total-price">0.00</span> บาท</span>
+    </div>
+
+    <div class="buttons">
+        <button class="clear" onclick="clearCart()">🗑️ ล้างรายการ</button>
+        <button class="checkout" onclick="openPaymentModal()">💰 คิดเงิน</button>
+    </div>
+
+    <div class="details">
+        <p>จำนวนรายการ: <span id="item-count">0</span></p>
+    </div>
+</div>
+
+<!-- ✅ Modal แสดงรายละเอียดสินค้าและรับเงินจากลูกค้า -->
+<div id="payment-modal" class="modal">
+    <div class="modal-content">
+        <h2>รายละเอียดการชำระเงิน</h2>
+        <table id="payment-summary">
+            <thead>
+                <tr>
+                    <th>สินค้า</th>
+                    <th>จำนวน</th>
+                    <th>ราคา</th>
+                    <th>รวม</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <p><strong>ยอดรวม:</strong> <span id="payment-total">0</span> บาท</p>
+        <label for="received-amount">รับเงินจากลูกค้า:</label>
+        <input type="number" id="received-amount" placeholder="จำนวนเงินที่ได้รับ" oninput="calculateChange()">
+        <p><strong>เงินทอน:</strong> <span id="change-amount">0</span> บาท</p>
+        <button onclick="confirmCheckout()">✅ ยืนยันการขาย</button>
+        <button onclick="closePaymentModal()">❌ ยกเลิก</button>
+    </div>
+</div>
+
+<!-- ✅ CSS สำหรับ Modal -->
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        margin: 10% auto;
+        width: 50%;
+        text-align: center;
+        border-radius: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+    table th, table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    input {
+        padding: 8px;
+        width: 50%;
+        margin: 10px 0;
+        font-size: 16px;
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/sell_product.js' %}" defer></script>  <!-- โหลดไฟล์ JavaScript -->
+{% endblock %}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Site{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <style>
+        /*สำหรับแถบเมนู */
+        .navbar {
+            background-color: #ffffff; /* สีพื้นหลังของแถบเมนู */
+            border: 1px solid black;
+            overflow: hidden; /* ทำให้เนื้อหาภายในไม่ล้นออกมา */
+        }
+    
+        .navbar a {
+            float: left; /* จัดเรียงให้เป็นแถบแนวนอน */
+            display: block; /* ให้แสดงผลเป็นบล็อก */
+            color: rgb(0, 0, 0); /* สีข้อความ */
+            text-align: center; /* จัดข้อความให้อยู่กลาง */
+            padding: 14px 16px; /* ช่องว่างรอบๆ ข้อความ */
+            text-decoration: none; /* เอาเส้นใต้ข้อความออก */
+        }
+    
+        .navbar a.logout {
+            float: right; /* ย้ายลิงก์ออกจากระบบไปด้านขวาสุด */
+        }
+    
+        .navbar a:hover {
+            background-color: #ddd; /* สีพื้นหลังเมื่อเลื่อนเมาส์ไป */
+            color: black; /* สีข้อความเมื่อเลื่อนเมาส์ไป */
+        }
+
+        /* สำหรับการจัดเนื้อหาให้กลางหน้า */
+        .center-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh; /* ปรับความสูงของหน้า */
+            flex-direction: column; /* เรียงเนื้อหาเป็นแนวตั้ง */
+        }
+
+        form {
+            text-align: center; /* จัดข้อความใน form ให้อยู่กลาง */
+        }
+
+        /* ปุ่ม */
+        .button-submit {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button-cancel {
+            background-color: rgb(248, 10, 10);
+            color: white;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-container {
+            background-color: white;
+            border: 1px solid black;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{% url 'product_management' %}">ข้อมูลสินค้า</a>
+        <a href="{% url 'add_stock' %}">รับสินค้าเข้าร้าน</a>
+        <a href="{% url 'employee_list' %}">ขึ้นชั้นวาง</a>
+        <a href="{% url 'employee_list' %}">ขายสินค้า</a>
+        <a href="{% url 'logout' %}" class="logout">ออกจากระบบ</a>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

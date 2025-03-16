@@ -1,0 +1,208 @@
+{% extends 'bar.html' %}
+{% block title %}📊 รายงานยอดขาย{% endblock %}
+
+{% block content %}
+<div class="report-switch">
+    <button onclick="location.href='/shopowner/sales_report/'">📊 รายงานยอดขาย</button>
+    <button onclick="location.href='/shopowner/stock_report/'">📦 รายงานสินค้า</button>
+</div>
+
+<!-- 🔹 ตัวเลือกช่วงวันที่ -->
+<label for="start-date">วันที่เริ่มต้น:</label>
+<input type="date" id="start-date">
+
+<label for="end-date">วันที่สิ้นสุด:</label>
+<input type="date" id="end-date">
+
+<button onclick="fetchSalesReport()">🔍 แสดง</button>
+
+<!-- ✅ แสดงยอดขายรวมทั้งหมด -->
+<div id="total-sales-amount" style="margin-top: 10px; font-size: 25px; font-weight: bold;">
+    ยอดขายรวมทั้งหมด: 0.00 บาท
+</div>
+
+<!-- 🔹 ตารางแสดงยอดขาย -->
+<table border="1">
+    <thead>
+        <tr>
+            <th>ลำดับ</th>
+            <th>เลขที่ใบเสร็จ</th>
+            <th>วันที่ขาย</th>
+            <th>จำนวนสินค้า</th>
+            <th>ยอดขายรวม</th>
+            <th>ดูรายละเอียด</th>
+        </tr>
+    </thead>
+    <tbody id="sales-table-body">
+        <tr><td colspan="6">กรุณาเลือกวันที่แล้วกด "แสดง"</td></tr>
+    </tbody>
+</table>
+
+<!-- 🔹 ปุ่มเปลี่ยนหน้า -->
+<div id="pagination">
+    <button id="prev-page" onclick="changePage(-1)" disabled>⬅️ ก่อนหน้า</button>
+    <span id="current-page">หน้า 1</span>
+    <button id="next-page" onclick="changePage(1)">ถัดไป ➡️</button>
+</div>
+
+<!-- ✅ Modal แสดงรายละเอียดใบเสร็จ -->
+<div id="saleDetailModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>รายละเอียดใบเสร็จ #<span id="modal-sale-id"></span></h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>รหัสสินค้า</th>
+                    <th>ชื่อสินค้า</th>
+                    <th>จำนวน</th>
+                    <th>ราคารวม</th>
+                </tr>
+            </thead>
+            <tbody id="modal-sale-items">
+                <tr><td colspan="4">กำลังโหลด...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+table {
+    width: 100%;
+    table-layout: fixed; /* 🔥 บังคับให้ทุกคอลัมน์มีขนาดเท่ากัน */
+}
+th, td {
+    text-align: center;
+    white-space: nowrap; /* 🔥 ป้องกันข้อความขึ้นบรรทัดใหม่ */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+}
+.close {
+    color: red;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+button {
+    margin: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+</style>
+
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+function fetchSalesReport(page = 1) {
+    let startDate = document.getElementById("start-date").value;
+    let endDate = document.getElementById("end-date").value;
+    let tableBody = document.getElementById("sales-table-body");
+    let totalSalesAmountDiv = document.getElementById("total-sales-amount");
+    
+    if (!startDate || !endDate) {
+        alert("กรุณาเลือกวันที่ให้ครบ!");
+        return;
+    }
+
+    fetch(`/shopowner/sales_report_by_range/?start_date=${startDate}&end_date=${endDate}&page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("🔍 API Response:", data);
+            tableBody.innerHTML = ""; 
+
+            if (data.success && data.sales.length > 0) {
+                data.sales.forEach((sale, index) => {
+                    let row = `<tr>
+                        <td>${index + 1 + (page - 1) * 50}</td>
+                        <td>${sale.sale__id}</td>
+                        <td>${sale.sale__sale_date}</td>
+                        <td>${sale.total_items}</td>
+                        <td>${parseFloat(sale.total_amount).toFixed(2)}</td>
+                        <td><button onclick="viewSaleDetail('${sale.sale__id}')">📄 ดูรายละเอียด</button></td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+
+                totalSalesAmountDiv.innerHTML = `<strong>ยอดขายรวมทั้งหมด: ${parseFloat(data.total_sales_amount).toFixed(2)} บาท</strong>`;
+
+                currentPage = data.current_page;
+                totalPages = data.total_pages;
+                document.getElementById("current-page").textContent = `หน้า ${currentPage}`;
+                document.getElementById("prev-page").disabled = currentPage === 1;
+                document.getElementById("next-page").disabled = currentPage >= totalPages;
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="6">ไม่พบข้อมูล</td></tr>`;
+            }
+        })
+        .catch(error => {
+            console.error("🚨 Fetch Error:", error);
+            alert("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+        });
+}
+
+function viewSaleDetail(saleId) {
+    console.log("🔍 กำลังดึงข้อมูลใบเสร็จ ID:", saleId);
+    let modal = document.getElementById("saleDetailModal");
+    let modalSaleId = document.getElementById("modal-sale-id");
+    let modalSaleItems = document.getElementById("modal-sale-items");
+
+    modalSaleId.innerText = saleId;
+    modalSaleItems.innerHTML = "<tr><td colspan='4'>กำลังโหลด...</td></tr>";
+
+    fetch(`/shopowner/sale_detail/${saleId}/`)
+        .then(response => response.json())
+        .then(data => {
+            modalSaleItems.innerHTML = "";
+            if (data.success && data.items.length > 0) {
+                data.items.forEach(item => {
+                    let row = `<tr>
+                        <td>${item.product__product_code}</td>
+                        <td>${item.product__product_name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${parseFloat(item.item_total).toFixed(2)}</td>
+                    </tr>`;
+                    modalSaleItems.innerHTML += row;
+                });
+            } else {
+                modalSaleItems.innerHTML = "<tr><td colspan='4'>ไม่มีสินค้าในใบเสร็จนี้</td></tr>";
+            }
+        })
+        .catch(error => {
+            console.error("🚨 Fetch Error:", error);
+            modalSaleItems.innerHTML = `<tr><td colspan='4'>เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
+        });
+
+    modal.style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("saleDetailModal").style.display = "none";
+}
+
+function changePage(step) {
+    if ((step === -1 && currentPage > 1) || (step === 1 && currentPage < totalPages)) {
+        currentPage += step;
+        fetchSalesReport(currentPage);
+    }
+}
+</script>
+{% endblock %}

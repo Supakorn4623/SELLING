@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เจ้าของร้าน</title>
+    {% load static %}  <!-- โหลด static tag -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">  <!-- เชื่อมโยงไฟล์ CSS เดียวกัน -->
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2>เจ้าของร้าน</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Login</button>
+            </form>
+            <a href="{% url 'salesperson_login' %}">พนักงาน</a>  <!-- ลิงก์ไปยังหน้าเข้าสู่ระบบของพนักงานขาย -->
+        </div>
+    </div>
+</body>
+</html>

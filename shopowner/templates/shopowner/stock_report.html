@@ -1,0 +1,126 @@
+{% extends 'bar.html' %}
+{% block title %}📦 รายงานสต็อกสินค้า{% endblock %}
+
+{% block content %}
+<div class="report-switch">
+    <button onclick="location.href='/shopowner/sales_report/'">📊 รายงานยอดขาย</button>
+    <button onclick="location.href='/shopowner/stock_report/'">📦 รายงานสินค้า</button>
+</div>
+
+<!-- 🔹 ค้นหาสินค้า -->
+<label for="search">ค้นหาสินค้า:</label>
+<input type="text" id="search">
+
+<label for="search_by">ค้นหาด้วย:</label>
+<select id="search_by">
+    <option value="product_code">รหัสสินค้า</option>
+    <option value="product_name">ชื่อสินค้า</option>
+</select>
+
+<button onclick="fetchStockReport()">🔍 ค้นหา</button>
+<button onclick="fetchStockReport(true)">📋 แสดงสินค้าทั้งหมด</button>
+
+<!-- 🔹 ตารางแสดงสต็อกสินค้า -->
+<table border="1">
+    <thead>
+        <tr>
+            <th>ลำดับ</th>
+            <th>รหัสสินค้า</th>
+            <th>รายการสินค้า</th>
+            <th>ราคา (บาท)</th> <!-- ✅ เพิ่มคอลัมน์ราคา -->
+            <th>จำนวนในสต็อก</th>  
+            <th>จำนวนในชั้นวาง</th>
+        </tr>
+    </thead>
+    <tbody id="stock-table-body">
+        <tr><td colspan="6">กรุณาค้นหาหรือกด "แสดงสินค้าทั้งหมด"</td></tr>
+    </tbody>
+</table>
+
+<!-- 🔹 ปุ่มเปลี่ยนหน้า -->
+<div id="pagination">
+    <button id="prev-page" onclick="changePage(-1)" disabled>⬅️ ก่อนหน้า</button>
+    <span id="current-page">หน้า 1</span>
+    <button id="next-page" onclick="changePage(1)">ถัดไป ➡️</button>
+</div>
+
+<style>
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    th, td {
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    button {
+        margin: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+function fetchStockReport(showAll = false) {
+    let searchQuery = document.getElementById("search").value;
+    let searchBy = document.getElementById("search_by").value;
+    let tableBody = document.getElementById("stock-table-body");
+    let url = `/shopowner/api/stock_report/?page=${currentPage}`;
+    
+    if (!showAll && searchQuery) {
+        url += `&search=${encodeURIComponent(searchQuery)}&search_by=${searchBy}`;
+    }
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            console.log("🔍 API Response:", data);
+            tableBody.innerHTML = ""; // ✅ ล้างข้อมูลเก่าออกก่อน
+
+            if (data.success && data.stocks.length > 0) {
+                data.stocks.forEach((item, index) => {
+                    let row = `<tr>
+                        <td>${index + 1 + (currentPage - 1) * 50}</td>
+                        <td>${item.product_code}</td>
+                        <td>${item.product_name}</td>
+                        <td>${item.price ? item.price.toLocaleString() : "-"}</td> <!-- ✅ แสดงราคา -->
+                        <td>${item.stock}</td>
+                        <td>${item.shelf_quantity}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+
+                // อัปเดตค่าหน้าปัจจุบันและจำนวนหน้าทั้งหมด
+                currentPage = data.current_page;
+                totalPages = data.total_pages;
+                document.getElementById("current-page").textContent = `หน้า ${currentPage}`;
+
+                // ปรับสถานะปุ่ม ก่อนหน้า / ถัดไป
+                document.getElementById("prev-page").disabled = currentPage === 1;
+                document.getElementById("next-page").disabled = currentPage >= totalPages;
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="6">ไม่พบข้อมูล</td></tr>`;
+            }
+        })
+        .catch(error => {
+            console.error("🚨 Fetch Error:", error);
+            alert("เกิดข้อผิดพลาดในการโหลดข้อมูล");
+        });
+}
+
+function changePage(step) {
+    if ((step === -1 && currentPage > 1) || (step === 1 && currentPage < totalPages)) {
+        currentPage += step;
+        fetchStockReport();
+    }
+}
+
+// โหลดข้อมูลครั้งแรก
+fetchStockReport(true);
+</script>
+{% endblock %}

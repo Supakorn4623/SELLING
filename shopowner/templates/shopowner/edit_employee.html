@@ -1,0 +1,106 @@
+{% extends 'shopowner/bar.html' %} <!-- ปรับให้ตรงกับเส้นทางไฟล์ -->
+
+{% block title %}Edit Employee{% endblock %}
+
+{% block content %}
+<div class="center-content">
+    <!-- ฟอร์มแก้ไขพนักงาน -->
+    <div class="form-container">
+        <h2 class="rounded-heading">แก้ไขพนักงาน</h2>
+        <form method="POST" class="form-edit">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <!-- ปุ่มอัพเดต -->
+            <button type="submit" class="button-submit">ยืนยัน</button>
+            
+            <!-- ปุ่มยกเลิก -->
+            <a href="{% url 'employee_list' %}">
+                <button type="button" class="button-cancel">ยกเลิก</button>
+            </a>
+        </form>
+    </div>
+
+    <!-- แสดงข้อความแจ้งเตือน -->
+    {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+<style>
+    /* สไตล์สำหรับหัวข้อ */
+    .rounded-heading {
+        padding: 15px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 12px;  /* มุมโค้งมน */
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* ฟอร์มแก้ไขพนักงาน */
+    .form-container {
+        width: 60%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-edit {
+        width: 100%;
+    }
+
+    /* ปุ่มอัพเดต */
+    .button-submit {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .button-submit:hover {
+        background-color: #2980b9;
+    }
+
+    /* ปุ่มยกเลิก */
+    .button-cancel {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .button-cancel:hover {
+        background-color: #c0392b;
+    }
+
+    /* แสดงข้อความแจ้งเตือน */
+    .alert-container {
+        margin-top: 20px;
+    }
+
+    .alert {
+        padding: 10px;
+        background-color: #f39c12;
+        color: white;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+</style>

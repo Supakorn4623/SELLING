@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}ขึ้นชั้นวางสินค้า{% endblock %}
+
+{% block content %}
+<!-- Form Section -->
+<div class="row justify-content-center" style="margin-top: 80px;"></div>
+<div class="row">
+    <div class="col-12">
+        <div class="form-container p-3" style="background-color: #5363f1; border: 1px solid #ccc;">
+            <h4 class="text-left mb-3" style="color: orange;">ขึ้นชั้นวางสินค้า</h4>
+            
+            <!-- ฟอร์มสำหรับการขึ้นชั้นวางสินค้า -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="product_code" class="form-label">รหัสสินค้า:</label>
+                        {{ form.product_code }}
+                    </div>
+                    <div class="col-6">
+                        <label for="shelf_quantity" class="form-label">จำนวน:</label>
+                        {{ form.shelf_quantity }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="product_name" class="form-label">ชื่อสินค้า:</label>
+                        <input type="text" class="form-control" id="product_name" disabled value="{% if product %}{{ product.product_name }}{% else %}{{ '' }}{% endif %}">
+                    </div>
+                </div>
+
+                <!-- ปุ่มสำหรับขึ้นชั้นสินค้า -->
+                <div class="text-center">
+                    <button type="submit" name="action" value="move_to_shelf" class="btn btn-success me-2">ขึ้นชั้นวาง</button>
+                    <button type="submit" name="action" value="move_to_stock" class="btn btn-warning">ย้ายไป Stock</button>
+                </div>
+            </form>
+
+            {% if message %}
+                <div class="alert alert-success mt-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Table Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container p-3" style="background-color: #f2f2f2; border: 1px solid #ccc;">
+            <h3 class="mt-4" style="color: orange;">รายการสินค้าบนชั้นวาง</h3>
+
+            <!-- ฟังก์ชันค้นหาสินค้า -->
+            <input type="text" id="searchInput" class="form-control mb-3" placeholder="กรอกรหัสหรือชื่อสินค้าเพื่อค้นหา" onkeyup="filterProducts()">
+
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>รหัสสินค้า</th>
+                        <th>ชื่อสินค้า</th>
+                        <th>ราคา</th>
+                        <th>สต็อก</th>
+                        <th>ชั้นวาง</th>
+                    </tr>
+                </thead>
+                <tbody id="productTable">
+                    {% for shelf in shelves %}
+                    <tr>
+                        <td>{{ shelf.product.product_code }}</td>
+                        <td>{{ shelf.product.product_name }}</td>
+                        <td>{{ shelf.product.price }}</td>
+                        <td>{{ shelf.product.stock }}</td>
+                        <td>{{ shelf.shelf_quantity }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">ไม่มีสินค้าบนชั้นวาง</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ฟังก์ชันค้นหาสินค้า
+    function filterProducts() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('productTable').getElementsByTagName('tr');
+        
+        for (let i = 0; i < rows.length; i++) {
+            let cells = rows[i].getElementsByTagName('td');
+            let match = false;
+            
+            for (let j = 0; j < cells.length - 1; j++) { // excluding the last cell (actions column)
+                if (cells[j].innerText.toLowerCase().includes(input)) {
+                    match = true;
+                }
+            }
+            rows[i].style.display = match ? '' : 'none';
+        }
+    }
+</script>
+
+{% endblock %}
