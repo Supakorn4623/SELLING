@@ -59,7 +59,7 @@ def create_employee_view(request):
             password = form.cleaned_data['password']
             User.objects.create(username=username, password=password, role='salesperson')
             messages.success(request, "Employee created successfully!")
-            return redirect('owner_dashboard')
+            return redirect('employee_list')
     else:
         form = EmployeeCreationForm()
 
@@ -147,20 +147,26 @@ def sale_detail(request, sale_id):
     
 def stock_report(request):
     page = int(request.GET.get("page", 1))
-    per_page = 50 # แสดง 50 รายการต่อหน้า
+    per_page = 50 
 
-    product_stock = Product.objects.values(
-        "product_code",
-        "product_name",
-        "price",
-        "stock"
-    )
+    search_query = request.GET.get("search", "").strip()
+    search_by = request.GET.get("search_by", "")
 
+    product_stock = Product.objects.values("product_code", "product_name", "price", "stock")
     shelf_stock = Shelf.objects.select_related("product").values(
         "product__product_code",
         "product__product_name",
         "shelf_quantity"
     )
+
+    # 🔹 กรองข้อมูลเมื่อมีการค้นหา
+    if search_query:
+        if search_by == "product_code":
+            product_stock = product_stock.filter(product_code__icontains=search_query)
+            shelf_stock = shelf_stock.filter(product__product_code__icontains=search_query)
+        elif search_by == "product_name":
+            product_stock = product_stock.filter(product_name__icontains=search_query)
+            shelf_stock = shelf_stock.filter(product__product_name__icontains=search_query)
 
     stock_data = []
     product_map = {
@@ -181,11 +187,11 @@ def stock_report(request):
             "shelf_quantity": shelf_item["shelf_quantity"],
         })
 
-    # ✅ คำนวณจำนวนหน้าเหมือน `sales_report_by_range`
+    # 🔹 แบ่งหน้าข้อมูล
     total_pages = (len(stock_data) // per_page) + (1 if len(stock_data) % per_page else 0)
     start_index = (page - 1) * per_page
     end_index = start_index + per_page
-    stock_data = stock_data[start_index:end_index]  # ✅ ตัดข้อมูลเฉพาะหน้าที่ร้องขอ
+    stock_data = stock_data[start_index:end_index]  
 
     return JsonResponse({
         "success": True,

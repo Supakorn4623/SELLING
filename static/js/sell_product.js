@@ -94,7 +94,11 @@ function updateCartDisplay() {
             <td>${code}</td>
             <td>${item.name}</td>
             <td>${item.price.toFixed(2)}</td>
-            <td>${item.quantity}</td>
+            <td>
+                <button onclick="decreaseQuantity('${code}')">➖</button>
+                <span id="qty-${code}">${item.quantity}</span>
+                <button onclick="increaseQuantity('${code}')">➕</button>
+            </td>
             <td>${(item.price * item.quantity).toFixed(2)}</td>
             <td><button onclick="removeItem('${code}')">❌</button></td>
         </tr>`;
@@ -104,6 +108,25 @@ function updateCartDisplay() {
 
     document.getElementById("total-price").innerText = total.toFixed(2);
     document.getElementById("item-count").innerText = Object.keys(cart).length;
+}
+
+// เพิ่มจำนวนสินค้า
+function increaseQuantity(code) {
+    if (cart[code]) {
+        cart[code].quantity++;
+        document.getElementById(`qty-${code}`).innerText = cart[code].quantity;
+        updateCartDisplay();
+    }
+}
+
+// ลดจำนวนสินค้า
+function decreaseQuantity(code) {
+    if (cart[code] && cart[code].quantity > 1) {
+        cart[code].quantity--;
+    } else {
+        delete cart[code]; // ถ้าจำนวนเป็น 0 ให้ลบออกจากตะกร้า
+    }
+    updateCartDisplay();
 }
 
 // ฟังก์ชันล้างตะกร้าทั้งหมด

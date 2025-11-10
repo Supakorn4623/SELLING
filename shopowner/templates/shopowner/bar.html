@@ -7,78 +7,450 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /*สำหรับแถบเมนู */
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --danger: #ef4444;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f9fafb;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Modern Navbar */
         .navbar {
-            background-color: #ffffff; /* สีพื้นหลังของแถบเมนู */
-            border: 1px solid black;
-            overflow: hidden; /* ทำให้เนื้อหาภายในไม่ล้นออกมา */
-        }
-    
-        .navbar a {
-            float: left; /* จัดเรียงให้เป็นแถบแนวนอน */
-            display: block; /* ให้แสดงผลเป็นบล็อก */
-            color: rgb(0, 0, 0); /* สีข้อความ */
-            text-align: center; /* จัดข้อความให้อยู่กลาง */
-            padding: 14px 16px; /* ช่องว่างรอบๆ ข้อความ */
-            text-decoration: none; /* เอาเส้นใต้ข้อความออก */
-        }
-    
-        .navbar a.logout {
-            float: right; /* ย้ายลิงก์ออกจากระบบไปด้านขวาสุด */
-        }
-    
-        .navbar a:hover {
-            background-color: #ddd; /* สีพื้นหลังเมื่อเลื่อนเมาส์ไป */
-            color: black; /* สีข้อความเมื่อเลื่อนเมาส์ไป */
+            background-color: #ffffff;
+            box-shadow: var(--shadow-md);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        /* สำหรับการจัดเนื้อหาให้กลางหน้า */
-        .center-content {
+        .navbar-container {
+            max-width: 1280px;
+            margin: 0 auto;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            min-height: 80vh; /* ปรับความสูงของหน้า */
-            flex-direction: column; /* เรียงเนื้อหาเป็นแนวตั้ง */
+            padding: 0 1.5rem;
         }
 
-        form {
-            text-align: center; /* จัดข้อความใน form ให้อยู่กลาง */
+        .nav-logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+            padding: 1rem 0;
         }
 
-        /* ปุ่ม */
-        .button-submit {
-            background-color: #4CAF50;
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a {
+            display: inline-flex;
+            align-items: center;
+            color: var(--gray-800);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 1.25rem 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar a i {
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: var(--primary);
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        .navbar a.active {
+            color: var(--primary);
+        }
+
+        .navbar a.active::after {
+            width: 100%;
+        }
+
+        .navbar a.logout {
+            background-color: #ffffff;
+            color: var(--danger);
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            margin-left: 1rem;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .navbar a.logout:hover {
+            background-color: var(--danger);
             color: white;
-            padding: 10px 20px;
-            margin-right: 10px;
-            border: none;
-            cursor: pointer;
+            border-color: var(--danger);
         }
 
-        .button-cancel {
-            background-color: rgb(248, 10, 10);
+        .navbar a.logout::after {
+            content: none;
+        }
+
+        /* Content styling */
+        .content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-800);
+            font-size: 1rem;
+        }
+
+        /* Card styling */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        /* Dashboard styling */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card .icon {
+            background-color: var(--primary-light);
             color: white;
-            padding: 10px 20px;
-            margin-right: 10px;
-            border: none;
-            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
         }
 
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            color: var(--gray-800);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Form styling */
         .form-container {
             background-color: white;
-            border: 1px solid black;
-            padding: 50px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-family: 'Prompt', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Button styling */
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-family: 'Prompt', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-success {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #0d9488;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Table styling */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--gray-100);
+        }
+
+        tbody tr:hover {
+            background-color: var(--gray-200);
+        }
+
+        td {
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .navbar-container {
+                flex-direction: column;
+                padding: 0.5rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .navbar a {
+                padding: 1rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .navbar a i {
+                margin-right: 0.3rem;
+            }
+
+            .navbar a.logout {
+                margin-left: 0;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Utility classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <a href="{% url 'create_employee' %}">เพิ่มพนักงาน</a>
-        <a href="{% url 'employee_list' %}">จัดการพนักงาน</a>
-        <a href="{% url 'sales_report' %}">รายงาน</a>
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-        <a href="{% url 'logout' %}" class="logout">ออกจากระบบ</a>
+        <div class="navbar-container">
+            <div class="nav-logo">
+                <i class="fas fa-user-shield"></i> AdminSys
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'create_employee' %}" class="{% if request.resolver_match.url_name == 'create_employee' %}active{% endif %}">
+                    <i class="fas fa-user-plus"></i> เพิ่มพนักงาน
+                </a>
+                <a href="{% url 'employee_list' %}" class="{% if request.resolver_match.url_name == 'employee_list' %}active{% endif %}">
+                    <i class="fas fa-users"></i> จัดการพนักงาน
+                </a>
+                <a href="{% url 'sales_report' %}" class="{% if request.resolver_match.url_name == 'sales_report' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> รายงาน
+                </a>
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{% url 'logout' %}" class="logout">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="content">

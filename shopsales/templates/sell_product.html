@@ -58,6 +58,12 @@
         <p><strong>ยอดรวม:</strong> <span id="payment-total">0</span> บาท</p>
         <label for="received-amount">รับเงินจากลูกค้า:</label>
         <input type="number" id="received-amount" placeholder="จำนวนเงินที่ได้รับ" oninput="calculateChange()">
+        <div>
+            <button onclick="setReceivedAmount(100)">100 บาท</button>
+            <button onclick="setReceivedAmount(500)">500 บาท</button>
+            <button onclick="setReceivedAmount(1000)">1000 บาท</button>
+            <button onclick="setReceivedAmount(getTotalAmount())">รับพอดี</button>
+        </div>
         <p><strong>เงินทอน:</strong> <span id="change-amount">0</span> บาท</p>
         <button onclick="confirmCheckout()">✅ ยืนยันการขาย</button>
         <button onclick="closePaymentModal()">❌ ยกเลิก</button>
@@ -100,10 +106,59 @@
         margin: 10px 0;
         font-size: 16px;
     }
+    #payment-modal button {
+    font-size: 15px;
+    padding: 10px 20px;
+    border-radius: 10px; /* ทำให้ขอบมน */
+    background-color: #007bff; /* สีพื้นหลังปุ่ม */
+    color: white; /* สีตัวอักษร */
+    border: none; /* เอาขอบออก */
+    cursor: pointer; /* เปลี่ยนเมาส์เป็นรูปมือ */
+    transition: 0.3s; /* ทำให้เอฟเฟกต์ลื่นขึ้น */
+    margin-top: 15px; /* เพิ่มระยะห่างด้านบน */
+    }
+    #change-amount {
+    font-size: 30px; /* ขยายขนาดตัวอักษรให้ใหญ่ขึ้น */
+    font-weight: bold; /* ทำให้ตัวหนา */
+    color: #ff5722; /* เปลี่ยนสีเป็นส้มแดง ให้มองเห็นชัด */
+    display: block; /* ให้แสดงผลเป็นบล็อกเพื่อแยกจากข้อความอื่น */
+    margin-top: 15px; /* เพิ่มระยะห่างด้านบน */
+}
+
+
+#payment-modal button:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.buttons button {
+    font-size: 15px; /* ขยายขนาดตัวอักษร */
+    padding: 7px 20px; /* เพิ่มขนาดปุ่ม */
+    border-radius: 10px; /* ทำให้ขอบมน */
+    background-color: #58be70; /* สีพื้นหลังปุ่ม (เขียว) */
+    color: white; /* สีตัวอักษร */
+    border: none; /* เอาขอบออก */
+    cursor: pointer; /* เปลี่ยนเมาส์เป็นรูปมือ */
+    transition: 0.3s; /* ทำให้เอฟเฟกต์ลื่นขึ้น */
+    
+}
+.buttons button.clear {
+    background-color: #dc3545; /* สีแดงสำหรับปุ่มล้างรายการ */
+}
 </style>
 
 {% endblock %}
 
+<!-- ✅ ย้าย script ไปไว้ก่อนปิด </body> -->
 {% block extra_js %}
-<script src="{% static 'js/sell_product.js' %}" defer></script>  <!-- โหลดไฟล์ JavaScript -->
+<script src="{% static 'js/sell_product.js' %}"></script>
+<script>
+    function setReceivedAmount(amount) {
+        document.getElementById("received-amount").value = amount;
+        calculateChange(); // อัปเดตเงินทอนอัตโนมัติ
+    }
+    function getTotalAmount() {
+    return parseFloat(document.getElementById("payment-total").textContent) || 0;
+}
+</script>
 {% endblock %}
