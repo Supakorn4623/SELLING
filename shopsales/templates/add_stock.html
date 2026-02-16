@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}เพิ่มสต็อกสินค้า{% endblock %}
+
+{% block content %}
+<!-- Form Section -->
+<div class="row justify-content-center" style="margin-top: 80px;"></div>
+<div class="row">
+    <div class="col-12">
+        <div class="form-container p-3" style="background-color: #f1f1f1; border: 1px solid #ccc;">
+            <h4 class="text-left mb-3" style="color: orange;">เพิ่ม/ลดสต็อกสินค้า</h4>
+            
+            <!-- ฟอร์มเพิ่มและลบ Stock -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="product_code" class="form-label">รหัสสินค้า:</label>
+                        {{ form.product_code }}
+                    </div>
+                    <div class="col-6">
+                        <label for="received_quantity" class="form-label">จำนวนสินค้าที่เพิ่ม/ลด:</label>
+                        {{ form.received_quantity }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="product_name" class="form-label">ชื่อสินค้า:</label>
+                        <input type="text" class="form-control" id="product_name" disabled value="{% if product %}{{ product.product_name }}{% else %}{{ '' }}{% endif %}">
+                    </div>
+                </div>
+                
+                <!-- ปุ่มเพิ่มและลบ -->
+                <div class="text-center">
+                    <!-- ปุ่ม เพิ่ม Stock -->
+                    <button type="submit" name="action" value="add_stock" class="btn btn-success me-2">เพิ่ม Stock</button>
+                    <!-- ปุ่ม ลบ Stock -->
+                    <button type="submit" name="action" value="remove_stock" class="btn btn-danger">ลบ Stock</button>
+                </div>
+            </form>
+
+            {% if message %}
+                <div class="alert alert-success mt-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
+
+            <!-- แสดงรายละเอียดสินค้า -->
+            {% if product %}
+            <div class="mt-4">
+                <h5>ข้อมูลสินค้าที่เพิ่ม/ลดสต็อก</h5>
+                <ul>
+                    <li><strong>รหัสสินค้า:</strong> {{ product.product_code }}</li>
+                    <li><strong>ชื่อสินค้า:</strong> {{ product.product_name }}</li>
+                    <li><strong>ราคา:</strong> {{ product.price }}</li>
+                    <li><strong>สต็อกปัจจุบัน:</strong> {{ product.stock }}</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'bar.html' %}
+
+{% block title %}Create Employee{% endblock %}
+
+{% block content %}
+<div class="center-content">
+    <div class="form-container">
+        <h2>เพิ่มพนักงาน</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="button-submit">ยืนยัน</button>
+            <a href="{% url 'owner_dashboard' %}">
+                <button type="button" class="button-cancel">ยกเลิก</button>
+            </a>
+        </form>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

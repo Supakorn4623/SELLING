@@ -1,0 +1,267 @@
+{% extends 'bar.html' %}
+{% block title %}📊 Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Statistics Cards -->
+<div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin: 20px auto; max-width: 900px;">
+    <!-- Total Products Card -->
+    <div style="background: #e3f2fd; border-radius: 10px; padding: 20px; margin: 10px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin: 0; color: #1565c0;">📦 สินค้าทั้งหมด</h3>
+        <p style="text-align: center; font-size: 28px; font-weight: bold; margin: 10px 0; color: #0d47a1;">{{ total_products }}</p>
+        <p style="text-align: center; margin: 0; color: #1976d2;">รายการ</p>
+    </div>
+    
+    <!-- Today's Sales Card -->
+    <div style="background: #e8f5e9; border-radius: 10px; padding: 20px; margin: 10px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin: 0; color: #2e7d32;">💰 ยอดขายวันนี้</h3>
+        <p style="text-align: center; font-size: 28px; font-weight: bold; margin: 10px 0; color: #1b5e20;">{{ today_sales|floatformat:2 }}</p>
+        <p style="text-align: center; margin: 0; color: #388e3c;">บาท</p>
+    </div>
+    
+    <!-- Month's Sales Card -->
+    <div style="background: #fff3e0; border-radius: 10px; padding: 20px; margin: 10px; width: 250px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h3 style="text-align: center; margin: 0; color: #e65100;">📅 ยอดขายเดือนนี้</h3>
+        <p style="text-align: center; font-size: 28px; font-weight: bold; margin: 10px 0; color: #bf360c;">{{ month_sales|floatformat:2 }}</p>
+        <p style="text-align: center; margin: 0; color: #f57c00;">บาท</p>
+    </div>
+</div>
+
+<!-- สินค้าใกล้หมด - แบบใหม่ -->
+<div id="low-stock-container" style="max-width: 900px; margin: 20px auto; display: none;">
+    <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%); border-radius: 10px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h3 style="color: #d32f2f; margin: 0 0 15px 0; text-align: center; font-size: 20px;">
+            <span style="display: inline-block; animation: pulse 1.5s infinite;">⚠️</span> 
+            สินค้าใกล้หมด
+        </h3>
+        <div id="low-stock-items" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
+    </div>
+</div>
+
+<h2 style="text-align: center; font-size: 24px; margin-bottom: 20px;">📈 สถิติยอดขาย</h2>
+<!-- 🔹 ตัวเลือกช่วงเวลา -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <label for="time-range" style="font-weight: bold;">เลือกช่วงเวลา:</label>
+    <select id="time-range" onchange="fetchSalesChart()" style="padding: 5px; font-size: 16px; border-radius: 5px;">
+        <option value="daily">รายวัน</option>
+        <option value="monthly">รายเดือน</option>
+        <option value="yearly">รายปี</option>
+    </select>
+</div>
+
+<!-- 🔹 กราฟยอดขาย -->
+<div class="chart-container">
+    <canvas id="salesChart"></canvas>
+</div>
+
+<style>
+    .chart-container {
+        width: 90%;
+        max-width: 800px;
+        height: 400px;
+        margin: auto;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #salesChart {
+        width: 100%;
+        height: 100%;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    .low-stock-item {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        width: calc(33.333% - 10px);
+        min-width: 200px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .low-stock-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stock-critical {
+        border-left: 4px solid #d32f2f;
+    }
+    
+    .stock-warning {
+        border-left: 4px solid #ff9800;
+    }
+    
+    .stock-item-name {
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .stock-item-count {
+        font-size: 22px;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+    
+    .stock-critical .stock-item-count {
+        color: #d32f2f;
+    }
+    
+    .stock-warning .stock-item-count {
+        color: #ff9800;
+    }
+    
+    .stock-item-type {
+        font-size: 12px;
+        color: #666;
+        margin: 0;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ✅ ฟังก์ชันโหลดข้อมูลยอดขายเป็นกราฟ
+function fetchSalesChart() {
+    let timeRange = document.getElementById("time-range").value;
+    
+    fetch(`/shopowner/api/sales_chart/?range=${timeRange}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("🔍 Sales Chart Data:", data);
+
+            let labels = data.data.map(item => item.period);
+            let sales = data.data.map(item => item.total_sales);
+
+            renderChart(labels, sales, timeRange);
+        })
+        .catch(error => console.error("🚨 Fetch Error:", error));
+}
+
+// ✅ ฟังก์ชันสร้างกราฟ
+function renderChart(labels, sales, timeRange) {
+    let ctx = document.getElementById("salesChart").getContext("2d");
+
+    if (window.salesChartInstance) {
+        window.salesChartInstance.destroy();  // ✅ ลบกราฟเก่าก่อนสร้างใหม่
+    }
+
+    let chartTitle = {
+        daily: "ยอดขายรายวัน",
+        monthly: "ยอดขายรายเดือน",
+        yearly: "ยอดขายรายปี"
+    };
+
+    window.salesChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: chartTitle[timeRange],
+                data: sales,
+                backgroundColor: "rgba(54, 162, 235, 0.7)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+                hoverBackgroundColor: "rgba(54, 162, 235, 1)",
+                hoverBorderColor: "#000",
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "rgba(200, 200, 200, 0.3)"
+                    }
+                },
+                x: {
+                    grid: {
+                        color: "rgba(200, 200, 200, 0.3)"
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "top",
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `ยอดขาย: ${context.raw.toLocaleString()} บาท`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ✅ ฟังก์ชันโหลดข้อมูลแจ้งเตือนสินค้าใกล้หมด (แบบใหม่)
+function fetchLowStockAlerts() {
+    console.log("⏳ กำลังโหลดข้อมูลสินค้าใกล้หมด...");
+
+    fetch('/shopowner/api/low_stock_alerts/')
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ ข้อมูลสินค้าใกล้หมด:", data);
+
+        const container = document.getElementById('low-stock-container');
+        const itemsContainer = document.getElementById('low-stock-items');
+        
+        if (data.count > 0) {
+            // เคลียร์ข้อมูลเดิม
+            itemsContainer.innerHTML = '';
+            
+            // เพิ่มข้อมูลใหม่ของสินค้าที่ใกล้หมด
+            data.low_stock.forEach(item => {
+                const isCritical = item.amount <= 3; // ถ้าน้อยกว่าหรือเท่ากับ 3 ถือว่าวิกฤติ
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = `low-stock-item ${isCritical ? 'stock-critical' : 'stock-warning'}`;
+                
+                itemElement.innerHTML = `
+                    <p class="stock-item-name">${item.name}</p>
+                    <p class="stock-item-count">${item.amount} ชิ้น</p>
+                    <p class="stock-item-type">${item.type}</p>
+                `;
+                
+                itemsContainer.appendChild(itemElement);
+            });
+            
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    })
+    .catch(error => console.error("🚨 เกิดข้อผิดพลาด:", error));
+}
+
+// ✅ โหลดข้อมูลแจ้งเตือนสินค้าใกล้หมด และกราฟยอดขายเมื่อเปิดหน้าเว็บ
+fetchLowStockAlerts();
+fetchSalesChart();
+
+// ✅ อัปเดตข้อมูลแจ้งเตือนทุก 10 วินาที
+setInterval(fetchLowStockAlerts, 10000);
+</script>
+{% endblock %}

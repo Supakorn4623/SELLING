@@ -1,0 +1,40 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Shop Owner" as Owner
+actor "Salesperson" as Sales
+
+package "Use Cases" {
+  usecase UC_Login as "Login"
+  usecase UC_ManageEmployees as "Manage Employees\n(Create / Edit / Delete / List)"
+  usecase UC_ViewDashboard as "View Dashboard"
+  usecase UC_ViewReports as "View Reports\n(Sales, Stock)"
+  usecase UC_ProductManagement as "Product Management"
+  usecase UC_AddStock as "Add Stock"
+  usecase UC_MoveToShelf as "Move To Shelf"
+  usecase UC_SellProduct as "Sell Product"
+  usecase UC_ProcessPayment as "Process Payment"
+  usecase UC_GenerateReceipt as "Generate Receipt"
+}
+
+Owner --> UC_Login
+Sales --> UC_Login
+
+Owner --> UC_ManageEmployees
+Owner --> UC_ViewDashboard
+Owner --> UC_ViewReports
+Owner --> UC_ProductManagement
+
+Sales --> UC_ProductManagement
+Sales --> UC_AddStock
+Sales --> UC_MoveToShelf
+Sales --> UC_SellProduct
+
+UC_SellProduct ..> UC_ProcessPayment : <<include>>
+UC_SellProduct ..> UC_GenerateReceipt : <<include>>
+
+UC_ProductManagement ..> UC_AddStock : <<include>>
+UC_ProductManagement ..> UC_MoveToShelf : <<include>>
+
+@enduml

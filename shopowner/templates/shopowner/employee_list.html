@@ -1,0 +1,93 @@
+{% extends 'shopowner/bar.html' %} <!-- ปรับให้ตรงกับเส้นทางไฟล์ -->
+{% block title %}Employee List{% endblock %}
+{% block content %}
+<div class="center-content">
+    <h2 style="margin-top: -400px;">จัดการพนักงาน</h2>
+
+    <!-- เพิ่ม CSS สำหรับการตกแต่งตาราง -->
+    <style>
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;  /* กำหนดให้ตารางไม่ชนกับข้อความ */
+            font-size: 18px;
+            text-align: left;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        .styled-table th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        .styled-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .styled-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* ปรับรูปแบบของปุ่ม Edit และ Delete */
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;  /* ระยะห่างระหว่างปุ่ม Edit และ Delete */
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* ปรับรูปแบบของปุ่ม Delete */
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+
+    <!-- ห่อหุ้มตารางด้วย div สำหรับปรับตำแหน่ง -->
+    <div class="table-container">  
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Created At</th>  <!-- คอลัมน์สำหรับวันที่สร้าง -->
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.username }}</td>
+                        <td>{{ employee.created_at|date:"Y-m-d H:i:s" }}</td>  <!-- แสดงวันที่สร้าง -->
+                        <td>
+                            <!-- ปรับ Edit ให้เป็นปุ่ม -->
+                            <a href="{% url 'edit_employee' employee.pk %}">
+                                <button type="button">แก้ไข</button>
+                            </a>
+                            <!-- ปุ่ม Delete -->
+                            <form action="{% url 'delete_employee' employee.pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-btn">ลบ</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
